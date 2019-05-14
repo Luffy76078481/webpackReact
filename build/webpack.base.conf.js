@@ -20,11 +20,11 @@ module.exports = {
     },
     output: { //输出文件  publicPath定义所有资源路径的起始位置在哪儿
         path: path.resolve(__dirname, '../dist'),
-        filename: '[name].[hash].js',
-        // publicPath:"/",
+        filename: 'js/[name].[hash].js',
+        publicPath: "/",
     },
     resolve: {
-        extensions: ['*', '.js', '.json'], //方便引入依赖或者文件的时候可以省略后缀
+        extensions: ['*', '.js', '.json', 'jsx'], //方便引入依赖或者文件的时候可以省略后缀
         alias: { //配置引入模块的别名   方便引入不用写那么长
             '@': path.resolve(__dirname, '../src'),
         }
@@ -57,9 +57,13 @@ module.exports = {
             // },
             {
                 test: /\.(png|svg|jpg|gif)$/,
-                use: [
-                    'file-loader'
-                ]
+                use: {
+                    loader: 'file-loader',
+                    options: {
+                        limit: 1,
+                        name: "images/[path][name].[ext]?v=[hash:12]"
+                    }
+                }
             },
             {
                 test: /\.(woff|woff2|eot|ttf|otf)$/,
@@ -67,9 +71,21 @@ module.exports = {
                     'file-loader'
                 ]
             },
-            { //autoprefixer 插件为我们的 css 代码自动添加前缀以适应不同的浏览器。
+            {
                 test: /\.(css|scss)$/,
-                use: ['css-loader', 'postcss-loader', 'sass-loader']
+                use: [{
+                    loader: "style-loader"
+                }, {
+                    loader: "css-loader",
+                    options: {
+                        sourceMap: true
+                    }
+                }, {
+                    loader: "sass-loader",
+                    options: {
+                        sourceMap: true
+                    }
+                }]
             }
 
             // {  //
@@ -168,7 +184,7 @@ module.exports = {
             path: './dll', //是打包后的路径
             entry: { //入口
                 //vendor 指定的名称，数组内容就是要打包的第三方库的名称，不要写全路径，Webpack 会自动去 node_modules 中找到的。
-                // vendor: ['vue', 'vue-router', 'vuex']
+                vendor: ['react', 'react-dom', 'react-loadable', 'react-redux', 'react-router-dom', 'react-router-redux', 'redux', 'redux-thunk']
             }
         }),
         new webpack.optimize.SplitChunksPlugin(), //提取共同代码：
@@ -179,6 +195,7 @@ module.exports = {
         //提供全局的变量，在模块中使用无需用require引入
         new webpack.ProvidePlugin({
             $config: [path.resolve(__dirname, '../src/data/config.js'), 'default'],
+            $actions: [path.resolve(__dirname, '../src/common/actions.js')],
         }),
 
         // new webpack.DefinePlugin({   //提供全局变量，可直接用BASENAME访问，一般用于生产和打包或者APP、PC的分开判断

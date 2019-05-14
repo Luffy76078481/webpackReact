@@ -1,5 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import configureStore from './common/configureStore.prod';
+import { requirement } from "../config/requirement"
 
-ReactDOM.render(<App/>, document.getElementById('root'));
+const store = configureStore();
+const BaseRouter =  requirement.get("BaseRouter");
+init();
+
+function init() {
+    $actions.setStorage(store.dispatch, store.getState);
+
+    store.subscribe(() => {
+        var getState = store.getState;
+        var dispatch = store.dispatch;
+        actions.setStorage(dispatch, getState);
+    });
+    ReactDOM.render(<BaseRouter store={store}/>, document.getElementById('root'))
+
+};
